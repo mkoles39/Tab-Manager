@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab Manager</title>
+  <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">Tab Manager</h1>
+      <div class="header-actions">
+        <button id="save-session-btn" class="btn-icon" title="Session Kaydet">
+          <span class="icon">💾</span>
+        </button>
+        <button id="settings-btn" class="btn-icon" title="Ayarlar">
+          <span class="icon">⚙️</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+      <button class="tab-nav-btn active" data-view="tabs">Sekmeler</button>
+      <button class="tab-nav-btn" data-view="sessions">Sessions</button>
+      <button class="tab-nav-btn" data-view="groups">Gruplar</button>
+    </nav>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Sekme ara..." class="search-input">
+      <span class="search-icon">🔍</span>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <span class="stat-item">
+        <span class="stat-label">Toplam:</span>
+        <span id="total-tabs" class="stat-value">0</span>
+      </span>
+      <span class="stat-item">
+        <span class="stat-label">Seçili:</span>
+        <span id="selected-tabs" class="stat-value">0</span>
+      </span>
+      <span class="stat-item">
+        <span class="stat-label">Duplicate:</span>
+        <span id="duplicate-tabs" class="stat-value">0</span>
+      </span>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button id="select-all-btn" class="btn-secondary">Tümünü Seç</button>
+      <button id="close-selected-btn" class="btn-danger">Seçilenleri Kapat</button>
+      <button id="find-duplicates-btn" class="btn-secondary">Duplicate Bul</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="content">
+      <!-- Tabs View -->
+      <div id="tabs-view" class="view active">
+        <div id="tabs-container" class="tabs-container">
+          <!-- Tabs will be dynamically inserted here -->
+        </div>
+      </div>
+
+      <!-- Sessions View -->
+      <div id="sessions-view" class="view">
+        <div class="sessions-header">
+          <h2>Kaydedilmiş Sessions</h2>
+          <button id="new-session-btn" class="btn-primary">Yeni Session</button>
+        </div>
+        <div id="sessions-container" class="sessions-container">
+          <!-- Sessions will be dynamically inserted here -->
+        </div>
+      </div>
+
+      <!-- Groups View -->
+      <div id="groups-view" class="view">
+        <div class="groups-header">
+          <h2>Sekme Grupları</h2>
+          <button id="new-group-btn" class="btn-primary">Yeni Grup</button>
+        </div>
+        <div id="groups-container" class="groups-container">
+          <!-- Groups will be dynamically inserted here -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Templates -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title"></h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer">
+        <button id="modal-cancel" class="btn-secondary">İptal</button>
+        <button id="modal-confirm" class="btn-primary">Onayla</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/storageManager.js"></script>
+  <script src="scripts/tabManager.js"></script>
+  <script src="scripts/sessionManager.js"></script>
+  <script src="scripts/groupManager.js"></script>
+  <script src="scripts/uiController.js"></script>
+  <script src="scripts/popup.js"></script>
+</body>
+</html>
