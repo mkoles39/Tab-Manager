@@ -14,17 +14,31 @@
 
 ## Kurulum
 
+### Hazır paketle (önerilen)
+
+1. [`dist/chrome-tab-manager-v1.0.0.zip`](dist/chrome-tab-manager-v1.0.0.zip) dosyasını indirin ve bir klasöre çıkarın
+2. Chrome'da `chrome://extensions/` adresine gidin
+3. Sağ üstteki "Geliştirici modu"nu aktif edin
+4. "Paketlenmemiş öğe yükle" butonuna tıklayın ve çıkardığınız klasörü seçin
+
+> Chrome, Web Store dışındaki `.zip` dosyalarını doğrudan yüklemez; önce çıkarmanız gerekir.
+> Klasörü sildiğinizde eklenti de kalkar, bu yüzden kalıcı bir yere çıkarın.
+
 ### Geliştirme Modu
 
 1. Bu repoyu klonlayın veya indirin
-2. Chrome'da `chrome://extensions/` adresine gidin
-3. Sağ üstteki "Geliştirici modu"nu aktif edin
-4. "Paketlenmemiş öğe yükle" butonuna tıklayın
-5. Proje klasörünü seçin
+2. Yukarıdaki 2-4. adımları uygulayıp repo klasörünü seçin
+
+Paketi yeniden oluşturmak için:
+
+```bash
+zip -r dist/chrome-tab-manager-v1.0.0.zip manifest.json background.js popup.html newtab.html scripts styles icons
+```
 
 ### Icon Dosyaları
 
-Icon dosyaları için `icons/icon.svg` dosyasını kullanarak PNG formatında icon'lar oluşturmanız gerekiyor:
+PNG icon'lar `icons/` klasöründe hazır. Değiştirmek isterseniz `icons/icon.svg` kaynağından yeniden üretebilirsiniz:
+
 - icon16.png (16x16)
 - icon48.png (48x48)
 - icon128.png (128x128)
