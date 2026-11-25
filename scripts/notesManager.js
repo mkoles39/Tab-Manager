@@ -69,7 +69,7 @@ class NotesManager {
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'note-delete-btn';
-        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.innerHTML = uiIcon('trash');
         deleteBtn.title = 'Notu Sil';
 
         deleteBtn.addEventListener('click', async () => {

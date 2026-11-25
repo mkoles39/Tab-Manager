@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Manager - Yeni Sekme</title>
   <link rel="stylesheet" href="styles/newtab.css">
+  <script src="scripts/ui.js"></script>
 </head>
 
 <body>
@@ -13,28 +14,23 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-top">
-        <div class="logo-container">
-          <span class="logo-icon">📑</span>
-        </div>
+        <img class="logo" src="icons/icon48.png" alt="">
         <nav class="sidebar-nav">
-          <button class="nav-item active" title="Workspaces">
-            <span class="nav-icon">⊞</span>
+          <button class="nav-item active" data-view="board-container">
+            <span data-icon="board"></span><span class="nav-label">Panolar</span>
           </button>
-          <button class="nav-item" title="Notes">
-            <span class="nav-icon">📝</span>
+          <button class="nav-item" data-view="notes-view">
+            <span data-icon="note"></span><span class="nav-label">Notlar</span>
           </button>
-          <button class="nav-item" title="To-do">
-            <span class="nav-icon">✓</span>
+          <button class="nav-item" data-view="todo-view">
+            <span data-icon="check"></span><span class="nav-label">Görevler</span>
           </button>
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <button class="nav-item" title="Settings">
-          <span class="nav-icon">⚙️</span>
+        <button id="open-settings-btn" class="nav-item">
+          <span data-icon="settings"></span><span class="nav-label">Ayarlar</span>
         </button>
-        <div class="user-profile">
-          <span class="user-avatar">M</span>
-        </div>
       </div>
     </aside>
 
@@ -42,18 +38,16 @@
     <main class="main-content">
       <!-- Top Bar -->
       <header class="top-bar">
-        <div class="workspace-selector">
-          <button class="workspace-btn active">Work</button>
-          <button class="workspace-btn">Personal</button>
-          <button class="add-workspace-btn">+</button>
+        <div class="search-container">
+          <span class="search-icon" data-icon="search"></span>
+          <input type="text" id="search-input" class="search-input" autocomplete="off">
         </div>
         <div class="top-actions">
-          <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="Search..." class="search-input">
-          </div>
-          <button id="show-open-tabs-btn" class="action-btn" title="Open Tabs">
-            <span class="icon">📑</span>
+          <button id="new-category-btn" class="action-btn">
+            <span data-icon="plus"></span> Kategori
+          </button>
+          <button id="show-open-tabs-btn" class="action-btn">
+            <span data-icon="tabs"></span> Açık Sekmeler <span id="open-tabs-count" class="badge"></span>
           </button>
         </div>
       </header>
@@ -64,7 +58,7 @@
         <div id="open-tabs-panel" class="open-tabs-panel hidden">
           <div class="panel-header">
             <h3>Açık Sekmeler</h3>
-            <button id="close-tabs-panel" class="btn-icon">✕</button>
+            <button id="close-tabs-panel" class="btn-icon" title="Kapat"><span data-icon="close"></span></button>
           </div>
           <div id="open-tabs-list" class="open-tabs-list">
             <!-- Open tabs will be listed here -->
@@ -91,7 +85,7 @@
       <!-- To-Do View -->
       <div id="todo-view" class="view-container hidden">
         <div class="view-header">
-          <h2>Yapılacaklar</h2>
+          <h2>Görevler</h2>
         </div>
         <div class="todo-container">
           <div class="todo-input-group">

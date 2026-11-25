@@ -40,7 +40,7 @@ class TabManager {
     } else {
       this.filteredTabs = this.tabs.filter(tab => {
         const title = (tab.title || '').toLowerCase();
-        const url = (tab.url || '').toLowerCase();
+        const url = (tab.url || tab.pendingUrl || '').toLowerCase();
         return title.includes(this.currentSearchTerm) || url.includes(this.currentSearchTerm);
       });
     }
@@ -308,7 +308,7 @@ class TabManager {
     const gotoBtn = document.createElement('button');
     gotoBtn.className = 'btn-icon tab-goto';
     gotoBtn.title = 'Git';
-    gotoBtn.textContent = '↗';
+    gotoBtn.innerHTML = uiIcon('open');
     gotoBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.goToTab(tab.id);
@@ -317,7 +317,7 @@ class TabManager {
     const closeBtn = document.createElement('button');
     closeBtn.className = 'btn-icon tab-close';
     closeBtn.title = 'Kapat';
-    closeBtn.textContent = '✕';
+    closeBtn.innerHTML = uiIcon('close');
     closeBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {

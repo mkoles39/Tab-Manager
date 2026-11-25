@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Manager</title>
   <link rel="stylesheet" href="styles/popup.css">
+  <script src="scripts/ui.js"></script>
 </head>
 <body>
   <div class="container">
@@ -12,11 +13,11 @@
     <header class="header">
       <h1 class="title">Tab Manager</h1>
       <div class="header-actions">
-        <button id="save-session-btn" class="btn-icon" title="Session Kaydet">
-          <span class="icon">💾</span>
+        <button id="save-session-btn" class="btn-icon" title="Session Kaydet" aria-label="Session Kaydet">
+          <span data-icon="save"></span>
         </button>
-        <button id="settings-btn" class="btn-icon" title="Ayarlar">
-          <span class="icon">⚙️</span>
+        <button id="settings-btn" class="btn-icon" title="Ayarlar" aria-label="Ayarlar">
+          <span data-icon="settings"></span>
         </button>
       </div>
     </header>
@@ -30,31 +31,20 @@
 
     <!-- Search Bar -->
     <div class="search-container">
-      <input type="text" id="search-input" placeholder="Sekme ara..." class="search-input">
-      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Sekme, yer işareti, session ara..." autocomplete="off" class="search-input">
+      <span class="search-icon" data-icon="search"></span>
     </div>
 
-    <!-- Stats Bar -->
-    <div class="stats-bar">
-      <span class="stat-item">
-        <span class="stat-label">Toplam:</span>
-        <span id="total-tabs" class="stat-value">0</span>
-      </span>
-      <span class="stat-item">
-        <span class="stat-label">Seçili:</span>
-        <span id="selected-tabs" class="stat-value">0</span>
-      </span>
-      <span class="stat-item">
-        <span class="stat-label">Duplicate:</span>
-        <span id="duplicate-tabs" class="stat-value">0</span>
-      </span>
-    </div>
-
-    <!-- Action Bar -->
+    <!-- Toolbar: counters and bulk actions -->
     <div class="action-bar">
+      <span class="stats">
+        <span id="total-tabs">0</span> sekme
+        · <span id="selected-tabs">0</span> seçili
+        · <span id="duplicate-tabs">0</span> tekrar
+      </span>
+      <button id="close-selected-btn" class="btn-danger hidden">Kapat</button>
       <button id="select-all-btn" class="btn-secondary">Tümünü Seç</button>
-      <button id="close-selected-btn" class="btn-danger">Seçilenleri Kapat</button>
-      <button id="find-duplicates-btn" class="btn-secondary">Duplicate Bul</button>
+      <button id="find-duplicates-btn" class="btn-secondary">Tekrarları Bul</button>
     </div>
 
     <!-- Main Content Area -->

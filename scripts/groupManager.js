@@ -102,8 +102,7 @@ class GroupManager {
     if (this.groups.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">🗂️</div>
-          <div class="empty-state-text">
+                    <div class="empty-state-text">
             Henüz grup oluşturulmamış.<br>
             Sekmeleri gruplamak için "Yeni Grup" butonuna tıklayın.
           </div>
@@ -149,7 +148,7 @@ class GroupManager {
 
     const toggleBtn = document.createElement('button');
     toggleBtn.className = 'btn-icon group-toggle';
-    toggleBtn.textContent = '▼';
+    toggleBtn.innerHTML = uiIcon('chevron');
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.toggleGroupCollapse(group.id);
@@ -225,7 +224,7 @@ class GroupManager {
     const removeBtn = document.createElement('button');
     removeBtn.className = 'btn-icon tab-close';
     removeBtn.title = 'Gruptan Çıkar';
-    removeBtn.textContent = '✕';
+    removeBtn.innerHTML = uiIcon('close');
     removeBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       try {

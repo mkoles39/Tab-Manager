@@ -144,40 +144,127 @@ class UIController {
       });
     }
 
-    // Workspace buttons
-    const workspaceBtns = document.querySelectorAll('.workspace-btn');
-    workspaceBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Update active state
-        workspaceBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    const settingsButton = document.getElementById('open-settings-btn');
+    if (settingsButton) {
+      settingsButton.addEventListener('click', () => this.showSettingsModal());
+    }
 
-        // Filter bookmarks based on workspace (mock implementation)
-        const workspaceName = btn.textContent.trim();
-        this.showNotification(`${workspaceName} çalışma alanı seçildi`, 'success');
+    const newCategoryButton = document.getElementById('new-category-btn');
+    if (newCategoryButton) {
+      newCategoryButton.addEventListener('click', () => this.showCreateCategoryModal());
+    }
+  }
 
-        // In a real implementation, we would filter categories here
-        if (this.bookmarkManager) {
-          this.bookmarkManager.renderBookmarks();
-        }
-      });
+  // Settings dialog, shared by the popup and the new tab page
+  async showSettingsModal() {
+    const storage = new StorageManager();
+    const settings = { ...(await storage.getSettings()), ...appearance };
+
+    this.showModal('Ayarlar', `
+      <label class="form-row">Tema
+        <select id="setting-theme">
+          <option value="system">Sistem ayarı</option>
+          <option value="light">Açık</option>
+          <option value="dark">Koyu</option>
+        </select>
+      </label>
+      <label class="form-row">Liste sıklığı
+        <select id="setting-density">
+          <option value="compact">Sıkı</option>
+          <option value="comfortable">Rahat</option>
+          <option value="wide">Geniş (tam boy)</option>
+        </select>
+      </label>
+      <label class="form-row">Popup açılış görünümü
+        <select id="setting-view">
+          <option value="tabs">Sekmeler</option>
+          <option value="sessions">Sessions</option>
+          <option value="groups">Gruplar</option>
+        </select>
+      </label>
+      <label class="form-row">
+        <input type="checkbox" id="setting-confirm"> Seçili sekmeleri kapatmadan önce sor
+      </label>
+      <div class="form-row">
+        <button type="button" id="backup-export" class="btn-secondary">Yedek al</button>
+        <button type="button" id="backup-import" class="btn-secondary">Yedekten yükle</button>
+        <input type="file" id="backup-file" accept=".json,application/json" hidden>
+      </div>
+      <p class="form-hint">Yedek; session, not, görev ve ayarları içerir. Yer işaretleri tarayıcınızda durur.</p>
+    `);
+
+    document.getElementById('setting-theme').value = settings.themeChoice;
+    document.getElementById('setting-density').value = settings.density;
+    document.getElementById('setting-view').value = settings.defaultView;
+    document.getElementById('setting-confirm').checked = settings.confirmBeforeClose;
+
+    document.getElementById('backup-export').addEventListener('click', () => exportBackup());
+
+    const fileInput = document.getElementById('backup-file');
+    document.getElementById('backup-import').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      try {
+        const values = readBackup(await fileInput.files[0].text());
+        const confirmed = await this.showConfirmModal(
+          'Yedekten Yükle',
+          'Mevcut session, not, görev ve ayarlar yedektekilerle değiştirilecek. Devam edilsin mi?'
+        );
+        if (!confirmed) return;
+        await chrome.storage.local.set(values);
+        location.reload();
+      } catch (error) {
+        console.warn('Backup import failed:', error);
+        this.showNotification('Yedek yüklenemedi: ' + error.message, 'error');
+      }
+    });
+
+    document.getElementById('modal-confirm').onclick = async () => {
+      const updated = {
+        ...(await storage.getSettings()),
+        themeChoice: document.getElementById('setting-theme').value,
+        density: document.getElementById('setting-density').value,
+        defaultView: document.getElementById('setting-view').value,
+        confirmBeforeClose: document.getElementById('setting-confirm').checked
+      };
+      await storage.saveSettings(updated);
+      applyAppearance(updated);
+      this.settings = updated;
+      this.hideModal();
+      this.showNotification('Ayarlar kaydedildi', 'success');
+    };
+  }
+
+  // Rename a bookmark from its card
+  showRenameBookmarkModal(bookmark) {
+    this.showModal('Yer İşaretini Adlandır', '<input type="text" id="bookmark-rename" class="search-input">');
+
+    const input = document.getElementById('bookmark-rename');
+    input.value = bookmark.title;
+    input.focus();
+
+    const save = async () => {
+      const title = input.value.trim();
+      if (!title) {
+        this.showNotification('Lütfen bir isim girin', 'warning');
+        return;
+      }
+      await chrome.bookmarks.update(bookmark.id, { title });
+      this.hideModal();
+      await this.bookmarkManager.renderBookmarks();
+    };
+
+    document.getElementById('modal-confirm').onclick = save;
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') save();
     });
   }
 
   setupSidebarNavigation() {
     console.log('Setting up sidebar navigation');
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-    const views = {
-      'Workspaces': 'board-container',
-      'Notes': 'notes-view',
-      'To-do': 'todo-view'
-    };
-
     navItems.forEach(item => {
       item.addEventListener('click', () => {
-        const title = item.getAttribute('title');
-        console.log('Sidebar clicked:', title);
-        const viewId = views[title];
+        const viewId = item.dataset.view;
         if (viewId) {
           this.switchView(viewId);
 

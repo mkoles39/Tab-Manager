@@ -110,33 +110,54 @@ class BookmarkManager {
     return bookmarks;
   }
 
-  // Get icon for category based on name
+  // Get icon for category based on name.
+  // Words are matched from their start, so "Alışveriş" is not taken for "iş".
   getCategoryIcon(name) {
-    const nameLower = name.toLowerCase();
+    const fold = text => text.replace(/İ/g, 'i').toLowerCase().replace(/ı/g, 'i');
+    const words = fold(name).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    const rules = [
+      ['shop', ['shop', 'alişveriş', 'market']],
+      ['work', ['work', 'iş', 'çalişma']],
+      ['ai', ['ai', 'yapay']],
+      ['social', ['social', 'sosyal']],
+      ['code', ['dev', 'code', 'geliştir']],
+      ['news', ['news', 'haber']],
+      ['video', ['video', 'youtube']],
+      ['music', ['music', 'müzik']],
+      ['game', ['game', 'oyun']],
+      ['food', ['food', 'yemek']]
+    ];
+    const matches = (word, key) => (key === 'ai' ? word === key : word.startsWith(key));
+    const rule = rules.find(([, keys]) => keys.some(key => words.some(word => matches(word, key))));
+    return rule ? rule[0] : 'folder';
+  }
 
-    if (nameLower.includes('work') || nameLower.includes('iş') || nameLower.includes('çalışma')) {
-      return '💼';
-    } else if (nameLower.includes('ai') || nameLower.includes('yapay')) {
-      return '🤖';
-    } else if (nameLower.includes('shop') || nameLower.includes('alış') || nameLower.includes('market')) {
-      return '🛒';
-    } else if (nameLower.includes('social') || nameLower.includes('sosyal')) {
-      return '💬';
-    } else if (nameLower.includes('dev') || nameLower.includes('code') || nameLower.includes('geliştir')) {
-      return '💻';
-    } else if (nameLower.includes('news') || nameLower.includes('haber')) {
-      return '📰';
-    } else if (nameLower.includes('video') || nameLower.includes('youtube')) {
-      return '🎥';
-    } else if (nameLower.includes('music') || nameLower.includes('müzik')) {
-      return '🎵';
-    } else if (nameLower.includes('game') || nameLower.includes('oyun')) {
-      return '🎮';
-    } else if (nameLower.includes('food') || nameLower.includes('yemek')) {
-      return '🍔';
-    } else {
-      return '📁';
+  // Show a readable name when the bookmark has no title or only an address
+  getDisplayTitle(bookmark) {
+    const title = (bookmark.title || '').trim();
+    if (title && !/^(https?|file):\/\//i.test(title)) return title;
+
+    try {
+      const url = new URL(bookmark.url);
+      if (url.protocol === 'file:') return decodeURIComponent(url.pathname.split('/').pop()) || bookmark.url;
+      const page = url.pathname.split('/').filter(Boolean).pop();
+      const host = url.hostname.replace(/^www\./, '');
+      return page ? `${host} / ${decodeURIComponent(page)}` : host;
+    } catch {
+      return title || bookmark.url;
     }
+  }
+
+  async loadCollapsed() {
+    const result = await chrome.storage.local.get(['collapsedCategories']);
+    this.collapsed = new Set(result.collapsedCategories || []);
+  }
+
+  async toggleCollapsed(categoryId, element) {
+    const collapsed = element.classList.toggle('collapsed');
+    if (collapsed) this.collapsed.add(categoryId);
+    else this.collapsed.delete(categoryId);
+    await chrome.storage.local.set({ collapsedCategories: [...this.collapsed] });
   }
 
   // Open bookmark
@@ -167,21 +188,23 @@ class BookmarkManager {
 
     // Load bookmarks
     await this.loadBookmarks();
+    await this.loadCollapsed();
+    container.innerHTML = ''; // another render may have filled it meanwhile
 
     // Check if there are categories
     if (this.categories.size === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">📚</div>
+          
           <div class="empty-state-text">
-            Henüz bookmark klasörü yok.<br>
+            Henüz yer işareti klasörü yok.<br>
             Hızlı başlamak için varsayılan kategoriler oluşturun.
           </div>
           <button id="create-default-categories-btn" class="btn-primary" style="margin-top: 16px;">
-            ✨ Varsayılan Kategorileri Oluştur
+            Varsayılan Kategorileri Oluştur
           </button>
           <button id="create-custom-category-btn" class="btn-secondary" style="margin-top: 8px;">
-            ➕ Özel Kategori Oluştur
+            Özel Kategori Oluştur
           </button>
         </div>
       `;
@@ -239,38 +262,7 @@ class BookmarkManager {
       // Add "New Column" button at the end
       const addColumnBtn = document.createElement('button');
       addColumnBtn.className = 'window-group add-column-btn';
-      addColumnBtn.style.minWidth = 'var(--column-width)';
-      addColumnBtn.style.height = '100px';
-      addColumnBtn.style.display = 'flex';
-      addColumnBtn.style.alignItems = 'center';
-      addColumnBtn.style.justifyContent = 'center';
-      addColumnBtn.style.background = 'rgba(0,0,0,0.02)';
-      addColumnBtn.style.border = '2px dashed var(--border)';
-      addColumnBtn.style.cursor = 'pointer';
-      addColumnBtn.style.color = 'var(--text-secondary)';
-      addColumnBtn.style.fontSize = '14px';
-      addColumnBtn.style.fontWeight = '500';
-      addColumnBtn.style.transition = 'all 0.2s';
-
-      addColumnBtn.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-          <span style="font-size: 24px;">+</span>
-          <span>Yeni Kategori</span>
-        </div>
-      `;
-
-      addColumnBtn.addEventListener('mouseover', () => {
-        addColumnBtn.style.background = 'rgba(66, 133, 244, 0.05)';
-        addColumnBtn.style.borderColor = 'var(--primary-color)';
-        addColumnBtn.style.color = 'var(--primary-color)';
-      });
-
-      addColumnBtn.addEventListener('mouseout', () => {
-        addColumnBtn.style.background = 'rgba(0,0,0,0.02)';
-        addColumnBtn.style.borderColor = 'var(--border)';
-        addColumnBtn.style.color = 'var(--text-secondary)';
-      });
-
+      addColumnBtn.innerHTML = `${uiIcon('plus')}<span>Yeni Kategori</span>`;
       addColumnBtn.addEventListener('click', () => {
         if (window.uiController) {
           window.uiController.showCreateCategoryModal();
@@ -282,7 +274,7 @@ class BookmarkManager {
       // Still show empty state if no categories after loading
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">📚</div>
+          
           <div class="empty-state-text">
             Kategoriler yükleniyor...
           </div>
@@ -429,55 +421,31 @@ class BookmarkManager {
     const categoryHeader = document.createElement('div');
     categoryHeader.className = 'window-header';
 
-    // Header content container
-    const headerContent = document.createElement('div');
-    headerContent.className = 'window-header-content';
-    headerContent.style.display = 'flex';
-    headerContent.style.alignItems = 'center';
-    headerContent.style.flex = '1';
-    headerContent.style.gap = '12px';
+    if (this.collapsed?.has(category.id)) categoryGroup.classList.add('collapsed');
 
     const headerIcon = document.createElement('span');
     headerIcon.className = 'window-header-icon';
-    headerIcon.textContent = category.icon;
-
-    const headerInfo = document.createElement('div');
-    headerInfo.className = 'window-header-info';
+    headerIcon.innerHTML = uiIcon(category.icon);
 
     const headerTitle = document.createElement('div');
     headerTitle.className = 'window-header-title';
     headerTitle.textContent = category.name;
+    headerTitle.title = category.name;
 
     const headerCount = document.createElement('div');
     headerCount.className = 'window-header-count';
-    headerCount.textContent = `${category.bookmarks.length} sites`;
+    headerCount.textContent = `${category.bookmarks.length} site`;
 
-    headerInfo.appendChild(headerTitle);
-    headerInfo.appendChild(headerCount);
-    headerContent.appendChild(headerIcon);
-    headerContent.appendChild(headerInfo);
+    const collapseBtn = document.createElement('button');
+    collapseBtn.className = 'window-header-action collapse-btn';
+    collapseBtn.innerHTML = uiIcon('chevron');
+    collapseBtn.title = 'Daralt / Genişlet';
+    collapseBtn.addEventListener('click', () => this.toggleCollapsed(category.id, categoryGroup));
 
-    // Delete button
     const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'window-header-action';
-    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.className = 'window-header-action delete-category-btn';
+    deleteBtn.innerHTML = uiIcon('trash');
     deleteBtn.title = 'Kategoriyi Sil';
-    deleteBtn.style.background = 'transparent';
-    deleteBtn.style.border = 'none';
-    deleteBtn.style.cursor = 'pointer';
-    deleteBtn.style.opacity = '0'; // Hidden by default
-    deleteBtn.style.transition = 'opacity 0.2s';
-    deleteBtn.style.padding = '4px';
-    deleteBtn.style.borderRadius = '4px';
-
-    deleteBtn.addEventListener('mouseover', () => {
-      deleteBtn.style.backgroundColor = 'rgba(0,0,0,0.05)';
-    });
-
-    deleteBtn.addEventListener('mouseout', () => {
-      deleteBtn.style.backgroundColor = 'transparent';
-    });
-
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       if (window.uiController) {
@@ -485,16 +453,7 @@ class BookmarkManager {
       }
     });
 
-    // Show delete button on hover
-    categoryHeader.addEventListener('mouseenter', () => {
-      deleteBtn.style.opacity = '1';
-    });
-    categoryHeader.addEventListener('mouseleave', () => {
-      deleteBtn.style.opacity = '0';
-    });
-
-    categoryHeader.appendChild(headerContent);
-    categoryHeader.appendChild(deleteBtn);
+    categoryHeader.append(headerIcon, headerTitle, headerCount, deleteBtn, collapseBtn);
     categoryGroup.appendChild(categoryHeader);
 
     // Category bookmarks container
@@ -507,7 +466,7 @@ class BookmarkManager {
       emptyMessage.className = 'empty-category-message';
       emptyMessage.innerHTML = `
         <div style="padding: 20px; text-align: center; color: var(--text-secondary); font-size: 13px;">
-          Henüz bookmark yok<br>
+          Henüz yer işareti yok<br>
           <span style="font-size: 11px;">Sekmeleri buraya sürükleyin</span>
         </div>
       `;
@@ -681,7 +640,7 @@ class BookmarkManager {
       await chrome.bookmarks.remove(bookmarkId);
 
       if (window.uiController) {
-        window.uiController.showNotification('Bookmark silindi', 'success');
+        window.uiController.showNotification('Yer işareti silindi', 'success');
       }
 
       await this.renderBookmarks();
@@ -726,8 +685,8 @@ class BookmarkManager {
 
     const bookmarkTitle = document.createElement('div');
     bookmarkTitle.className = 'tab-title';
-    bookmarkTitle.textContent = bookmark.title || 'Untitled';
-    bookmarkTitle.title = bookmark.title;
+    bookmarkTitle.textContent = this.getDisplayTitle(bookmark);
+    bookmarkTitle.title = bookmark.title || bookmark.url;
 
     const bookmarkUrl = document.createElement('div');
     bookmarkUrl.className = 'tab-url';
@@ -745,7 +704,7 @@ class BookmarkManager {
     // Delete button
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'tab-delete-btn';
-    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.innerHTML = uiIcon('trash');
     deleteBtn.title = 'Sil';
 
     deleteBtn.addEventListener('click', async (e) => {
@@ -753,7 +712,7 @@ class BookmarkManager {
 
       if (window.uiController) {
         const confirmed = await window.uiController.showConfirmModal(
-          'Bookmark Sil',
+          'Yer İşareti Sil',
           `"${bookmark.title}" yer işaretini silmek istediğinize emin misiniz?`
         );
 
@@ -761,6 +720,15 @@ class BookmarkManager {
           await this.deleteBookmark(bookmark.id);
         }
       }
+    });
+
+    const renameBtn = document.createElement('button');
+    renameBtn.className = 'tab-delete-btn tab-rename-btn';
+    renameBtn.innerHTML = uiIcon('edit');
+    renameBtn.title = 'Yeniden adlandır';
+    renameBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.uiController?.showRenameBookmarkModal(bookmark);
     });
 
     // Click to open
@@ -772,7 +740,7 @@ class BookmarkManager {
         await this.openBookmark(bookmark.url, false);
       } catch (error) {
         if (window.uiController) {
-          window.uiController.showNotification('Bookmark açılamadı', 'error');
+          window.uiController.showNotification('Yer işareti açılamadı', 'error');
         }
       }
     });
@@ -780,6 +748,7 @@ class BookmarkManager {
     // Assemble
     bookmarkItem.appendChild(favicon);
     bookmarkItem.appendChild(bookmarkInfo);
+    bookmarkItem.appendChild(renameBtn);
     bookmarkItem.appendChild(deleteBtn);
 
     // Enable dragging
@@ -923,7 +892,7 @@ class BookmarkManager {
             await chrome.bookmarks.move(draggedBookmarkId, { parentId: category.id });
 
             if (window.uiController) {
-              window.uiController.showNotification('Bookmark taşındı', 'success');
+              window.uiController.showNotification('Yer işareti taşındı', 'success');
             }
 
             await this.renderBookmarks();

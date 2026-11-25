@@ -69,7 +69,7 @@ class TodoManager {
         // Delete Button
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'todo-delete-btn';
-        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.innerHTML = uiIcon('trash');
         deleteBtn.title = 'Görevi Sil';
         deleteBtn.addEventListener('click', () => this.deleteTodo(todo.id));
 

@@ -715,3 +715,209 @@ button:disabled {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Keyboard selection */
+.tab-item.kb-active {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+/* Redesign: theme and density are set on <html> by scripts/ui.js */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --primary-color: #8ab4f8;
+  --background: #17181c;
+  --surface: #222429;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0ac;
+  --border: #343740;
+}
+
+.icon-svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+[data-icon],
+.result-icon {
+  display: inline-flex;
+}
+
+.header {
+  padding: 10px 12px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.btn-icon {
+  display: inline-flex;
+  color: var(--text-secondary);
+}
+
+.tab-nav-btn {
+  padding: 8px;
+}
+
+.search-container {
+  padding: 8px 12px;
+}
+
+.search-input {
+  padding: 8px 36px 8px 12px;
+  border-radius: 10px;
+}
+
+.search-icon {
+  right: 24px;
+  color: var(--text-secondary);
+}
+
+.action-bar {
+  align-items: center;
+  padding: 6px 12px;
+  gap: 6px;
+}
+
+.action-bar.hidden,
+.action-bar .hidden {
+  display: none;
+}
+
+.stats {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.action-bar button {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.tabs-container {
+  padding: 6px 8px;
+}
+
+.window-group {
+  margin-bottom: 8px;
+}
+
+.window-header {
+  padding: 4px 8px;
+  margin-bottom: 2px;
+  background: transparent;
+  font-size: 12px;
+}
+
+.tab-item {
+  gap: 8px;
+  padding: 7px 8px;
+  margin-bottom: 2px;
+  border-color: transparent;
+}
+
+.tab-title {
+  font-size: 13px;
+}
+
+.tab-url {
+  font-size: 11px;
+}
+
+:root[data-density="compact"] .tab-item {
+  padding: 3px 8px;
+}
+
+:root[data-density="compact"] .tab-item .tab-url {
+  display: none;
+}
+
+:root[data-density="compact"] .result-item .tab-url,
+:root[data-density="compact"] .session-item .tab-url {
+  display: block;
+}
+
+.tab-goto,
+.tab-close {
+  padding: 3px 5px;
+}
+
+.group-toggle svg {
+  transition: transform 0.15s;
+}
+
+.group-item.collapsed .group-toggle {
+  transform: none;
+}
+
+.group-item.collapsed .group-toggle svg {
+  transform: rotate(-90deg);
+}
+
+.modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-body select {
+  margin-left: auto;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-primary);
+}
+
+.form-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .tab-item,
+:root[data-theme="dark"] .session-item,
+:root[data-theme="dark"] .group-item,
+:root[data-theme="dark"] .modal,
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] .search-input {
+  background-color: var(--surface);
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .tab-item {
+  background-color: transparent;
+}
+
+:root[data-theme="dark"] .tab-item:hover,
+:root[data-theme="dark"] .btn-secondary:hover,
+:root[data-theme="dark"] .btn-icon:hover,
+:root[data-theme="dark"] .tab-nav-btn:hover,
+:root[data-theme="dark"] .group-header:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .tab-item.active {
+  background-color: rgba(138, 180, 248, 0.14);
+}
+
+:root[data-theme="dark"] .modal-close {
+  color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .btn-primary {
+  color: #17181c;
+}
+
+:root[data-theme="dark"] .notification {
+  background-color: #3c4043;
+}

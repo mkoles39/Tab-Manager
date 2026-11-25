@@ -125,10 +125,9 @@ class SessionManager {
     if (this.sessions.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-state-icon">💾</div>
-          <div class="empty-state-text">
+                    <div class="empty-state-text">
             Henüz kaydedilmiş session yok.<br>
-            Mevcut sekmelerinizi kaydetmek için 💾 butonuna tıklayın.
+            Mevcut sekmelerinizi kaydetmek için üstteki kaydet düğmesine tıklayın.
           </div>
         </div>
       `;
@@ -215,7 +214,7 @@ class SessionManager {
     const renameBtn = document.createElement('button');
     renameBtn.className = 'btn-icon session-rename';
     renameBtn.title = 'Yeniden Adlandır';
-    renameBtn.textContent = '✏️';
+    renameBtn.innerHTML = uiIcon('edit');
     renameBtn.addEventListener('click', () => {
       if (window.uiController) {
         window.uiController.showRenameSessionModal(session);
@@ -226,7 +225,7 @@ class SessionManager {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'btn-icon session-delete';
     deleteBtn.title = 'Sil';
-    deleteBtn.textContent = '🗑️';
+    deleteBtn.innerHTML = uiIcon('trash');
     deleteBtn.addEventListener('click', () => {
       if (window.uiController) {
         window.uiController.showDeleteSessionModal(session);

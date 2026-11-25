@@ -9,6 +9,13 @@ class PopupController extends UIController {
 
     // The popup draws its own tab list; the new tab page is not affected.
     this.tabManager.renderTabs = () => this.renderTabList();
+
+    // Query tabs directly so the list does not wait for the background worker
+    this.tabManager.loadTabs = async () => {
+      this.tabManager.tabs = await chrome.tabs.query({});
+      this.tabManager.filteredTabs = [...this.tabManager.tabs];
+      return this.tabManager.tabs;
+    };
   }
 
   async init() {
@@ -16,10 +23,15 @@ class PopupController extends UIController {
       this.setupEventListeners(); // modal close / cancel / overlay
       this.setupPopupListeners();
       this.hideModal();
+      document.getElementById('search-input').focus();
+      this.getSearchSessions(); // start reading now so the first search is quicker
 
       this.settings = await this.storageManager.getSettings();
       await this.tabManager.refreshTabs();
-      this.switchPopupView(this.settings.defaultView);
+      // Do not switch away if the user has already started typing
+      if (!document.getElementById('search-input').value) {
+        await this.switchPopupView(this.settings.defaultView);
+      }
     } catch (error) {
       console.error('Error initializing popup:', error);
       this.showNotification('Başlatma hatası', 'error');
@@ -43,9 +55,23 @@ class PopupController extends UIController {
       button.addEventListener('click', () => this.run(() => this.switchPopupView(button.dataset.view)));
     });
 
-    document.getElementById('search-input').addEventListener('input', (event) => {
+    const search = document.getElementById('search-input');
+    search.addEventListener('input', () => {
       this.switchPopupView('tabs');
-      this.tabManager.filterTabs(event.target.value.trim());
+      this.tabManager.filterTabs(search.value.trim());
+    });
+    search.addEventListener('keydown', event => this.handleSearchKey(event));
+    chrome.storage.onChanged.addListener(changes => {
+      if (changes.sessions) this.searchSessions = null;
+    });
+
+    document.addEventListener('keydown', (event) => {
+      const overlay = document.getElementById('modal-overlay');
+      if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+        event.preventDefault();
+        this.hideModal();
+        search.focus();
+      }
     });
 
     // Enter confirms a modal that has a text field
@@ -75,10 +101,8 @@ class PopupController extends UIController {
     document.querySelectorAll('.view').forEach(element => {
       element.classList.toggle('active', element.id === `${name}-view`);
     });
-    // Stats and bulk actions only apply to the tab list
-    ['.stats-bar', '.action-bar'].forEach(selector => {
-      document.querySelector(selector).classList.toggle('hidden', name !== 'tabs');
-    });
+    // Counters and bulk actions only apply to the tab list
+    document.querySelector('.action-bar').classList.toggle('hidden', name !== 'tabs');
 
     if (name === 'sessions') {
       await this.sessionManager.loadSessions();
@@ -86,6 +110,137 @@ class PopupController extends UIController {
     } else if (name === 'groups') {
       await this.groupManager.loadGroups();
       await this.groupManager.renderGroups();
+    }
+  }
+
+  // ---------- Keyboard ----------
+
+  // Rows that can be reached with the arrow keys, in screen order
+  resultRows() {
+    return [...document.querySelectorAll('#tabs-container .tab-item')];
+  }
+
+  highlightRow(index) {
+    const rows = this.resultRows();
+    rows.forEach(row => row.classList.remove('kb-active'));
+    if (rows.length === 0) return;
+
+    const row = rows[(index + rows.length) % rows.length];
+    row.classList.add('kb-active');
+    row.scrollIntoView({ block: 'nearest' });
+  }
+
+  handleSearchKey(event) {
+    if (!document.getElementById('tabs-view').classList.contains('active')) return;
+
+    const rows = this.resultRows();
+    const current = rows.findIndex(row => row.classList.contains('kb-active'));
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.highlightRow(current + 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.highlightRow(current < 0 ? -1 : current - 1);
+    } else if (event.key === 'Enter' && current >= 0) {
+      event.preventDefault();
+      rows[current].click();
+    } else if (event.key === 'Escape' && event.target.value) {
+      // First Escape clears the search, the next one closes the popup
+      event.preventDefault();
+      event.target.value = '';
+      this.tabManager.filterTabs('');
+    }
+  }
+
+  // ---------- Bookmark and session results ----------
+
+  async renderExtraResults(term, token) {
+    const needle = term.toLowerCase();
+    const bookmarks = (await chrome.bookmarks.search(term)).filter(node => node.url).slice(0, 8);
+    const sessions = (await this.getSearchSessions()).filter(session =>
+      [session.name, ...session.tabs.flatMap(tab => [tab.title, tab.url])]
+        .some(text => (text || '').toLowerCase().includes(needle))
+    ).slice(0, 5);
+
+    // A newer search has been drawn while we were waiting
+    if (token !== this.renderToken) return;
+
+    const container = document.getElementById('tabs-container');
+
+    this.appendResultSection(container, 'Yer İşaretleri', bookmarks.map(bookmark =>
+      this.createResultRow('open', bookmark.title || bookmark.url, bookmark.url, async () => {
+        await chrome.tabs.create({ url: bookmark.url });
+        window.close();
+      })
+    ));
+
+    this.appendResultSection(container, 'Sessions', sessions.map(session =>
+      this.createResultRow('save', session.name, `${session.tabCount} sekme`, () => this.confirmRestore(session))
+    ));
+
+    if (!container.querySelector('.tab-item')) {
+      container.innerHTML = '<div class="empty-state">Sonuç bulunamadı</div>';
+    } else if (!container.querySelector('.kb-active')) {
+      this.highlightRow(0);
+    }
+  }
+
+  // Storage reads can be slow, so read once and reuse until the sessions change
+  getSearchSessions() {
+    this.searchSessions = this.searchSessions || this.storageManager.getSessions();
+    return this.searchSessions;
+  }
+
+  appendResultSection(container, title, rows) {
+    if (rows.length === 0) return;
+
+    const group = document.createElement('div');
+    group.className = 'window-group';
+
+    const header = document.createElement('div');
+    header.className = 'window-header';
+    header.textContent = title;
+
+    group.append(header, ...rows);
+    container.appendChild(group);
+  }
+
+  createResultRow(icon, title, detail, action) {
+    const row = document.createElement('div');
+    row.className = 'tab-item result-item';
+
+    const mark = document.createElement('span');
+    mark.className = 'result-icon';
+    mark.innerHTML = uiIcon(icon);
+
+    const info = document.createElement('div');
+    info.className = 'tab-info';
+
+    const heading = document.createElement('div');
+    heading.className = 'tab-title';
+    heading.textContent = title;
+
+    const sub = document.createElement('div');
+    sub.className = 'tab-url';
+    sub.textContent = detail;
+
+    info.append(heading, sub);
+    row.append(mark, info);
+    row.addEventListener('click', () => this.run(action));
+    return row;
+  }
+
+  // Opening a session creates many tabs, so ask first
+  async confirmRestore(session) {
+    const answer = this.showConfirmModal(
+      'Session Aç',
+      `<strong>${escapeHtml(session.name)}</strong> (${session.tabCount} sekme) yeni pencerede açılsın mı?`
+    );
+    document.getElementById('modal-confirm').focus();
+
+    if (await answer) {
+      await this.sessionManager.restoreSession(session.id, true);
     }
   }
 
@@ -101,10 +256,6 @@ class PopupController extends UIController {
     manager.selectedTabs.forEach(id => {
       if (!openIds.has(id)) manager.selectedTabs.delete(id);
     });
-
-    if (manager.filteredTabs.length === 0) {
-      container.innerHTML = '<div class="empty-state">Sonuç bulunamadı</div>';
-    }
 
     let windowNumber = 0;
     manager.groupTabsByWindow().forEach(tabs => {
@@ -138,6 +289,15 @@ class PopupController extends UIController {
     });
 
     this.updateSelectionState();
+
+    const token = this.renderToken = (this.renderToken || 0) + 1;
+    const term = document.getElementById('search-input').value.trim();
+    if (term) {
+      this.highlightRow(0);
+      this.run(() => this.renderExtraResults(term, token));
+    } else if (manager.filteredTabs.length === 0) {
+      container.innerHTML = '<div class="empty-state">Sonuç bulunamadı</div>';
+    }
   }
 
   allVisibleSelected() {
@@ -147,6 +307,8 @@ class PopupController extends UIController {
 
   updateSelectionState() {
     this.updateStats();
+    document.getElementById('close-selected-btn')
+      .classList.toggle('hidden', this.tabManager.selectedTabs.size === 0);
     document.getElementById('select-all-btn').textContent =
       this.allVisibleSelected() ? 'Seçimi Kaldır' : 'Tümünü Seç';
   }
@@ -314,36 +476,6 @@ class PopupController extends UIController {
     });
   }
 
-  // ---------- Settings ----------
-
-  showSettingsModal() {
-    this.showModal('Ayarlar', `
-      <label class="form-row">Açılış görünümü
-        <select id="setting-view">
-          <option value="tabs">Sekmeler</option>
-          <option value="sessions">Sessions</option>
-          <option value="groups">Gruplar</option>
-        </select>
-      </label>
-      <label class="form-row">
-        <input type="checkbox" id="setting-confirm"> Seçili sekmeleri kapatmadan önce sor
-      </label>
-    `);
-
-    document.getElementById('setting-view').value = this.settings.defaultView;
-    document.getElementById('setting-confirm').checked = this.settings.confirmBeforeClose;
-
-    this.onConfirm(async () => {
-      this.settings = {
-        ...this.settings,
-        defaultView: document.getElementById('setting-view').value,
-        confirmBeforeClose: document.getElementById('setting-confirm').checked
-      };
-      await this.storageManager.saveSettings(this.settings);
-      this.hideModal();
-      this.showNotification('Ayarlar kaydedildi', 'success');
-    });
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

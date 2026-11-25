@@ -75,7 +75,7 @@ function getFaviconUrl(tab) {
   if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
     return tab.favIconUrl;
   }
-  return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><text y="14" font-size="14">📄</text></svg>';
+  return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="%23888" stroke-width="1.3"><path d="M3 1.5h6l4 4v9H3z"/><path d="M9 1.5v4h4"/></svg>';
 }
 
 // Truncate text

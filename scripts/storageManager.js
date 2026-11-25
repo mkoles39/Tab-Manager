@@ -8,7 +8,8 @@ class StorageManager {
     };
     
     this.DEFAULT_SETTINGS = {
-      theme: 'light',
+      themeChoice: 'system',
+      density: 'compact',
       defaultView: 'tabs',
       confirmBeforeClose: true,
       autoSaveSession: false
