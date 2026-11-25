@@ -16,7 +16,7 @@
 
 ### İndirip Kurma
 
-**[⬇️ chrome-tab-manager-v1.0.1.zip indir](https://github.com/mkoles39/Tab-Manager/releases/latest/download/chrome-tab-manager-v1.0.1.zip)**
+**[⬇️ chrome-tab-manager-v1.0.2.zip indir](https://github.com/mkoles39/Tab-Manager/releases/latest/download/chrome-tab-manager-v1.0.2.zip)**
 
 1. Zip dosyasını indirip kalıcı bir klasöre çıkarın
 2. Tarayıcıda `chrome://extensions/` adresine gidin (Edge: `edge://extensions/`)
@@ -71,6 +71,9 @@ Detaylı test talimatları için `TESTING.md` dosyasına bakın.
 Bu proje kişisel kullanım için geliştirilmiştir. İyileştirme önerileri için issue açabilirsiniz.
 
 ## Sürüm Geçmişi
+
+### v1.0.2
+- Yeni sekme sayfasının iki kez yazılmış içeriği düzeltildi
 
 ### v1.0.1
 - Popup düğmeleri, arama, session, grup ve ayarlar işlevsel hale getirildi

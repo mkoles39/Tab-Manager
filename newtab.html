@@ -120,139 +120,17 @@
       </div>
     </div>
   </div>
-  <!DOCTYPE html>
-  <html lang="tr">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tab Manager - Yeni Sekme</title>
-    <link rel="stylesheet" href="styles/newtab.css">
-  </head>
+  <script src="scripts/utils.js"></script>
+  <script src="scripts/storageManager.js"></script>
+  <script src="scripts/bookmarkManager.js"></script>
+  <script src="scripts/tabManager.js"></script>
+  <script src="scripts/sessionManager.js"></script>
+  <script src="scripts/groupManager.js"></script>
+  <script src="scripts/notesManager.js"></script>
+  <script src="scripts/todoManager.js"></script>
+  <script src="scripts/uiController.js"></script>
+  <script src="scripts/newtab.js"></script>
+</body>
 
-  <body>
-    <div class="app-container">
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="sidebar-top">
-          <div class="logo-container">
-            <span class="logo-icon">📑</span>
-          </div>
-          <nav class="sidebar-nav">
-            <button class="nav-item active" title="Workspaces">
-              <span class="nav-icon">⊞</span>
-            </button>
-            <button class="nav-item" title="Notes">
-              <span class="nav-icon">📝</span>
-            </button>
-            <button class="nav-item" title="To-do">
-              <span class="nav-icon">✓</span>
-            </button>
-          </nav>
-        </div>
-        <div class="sidebar-bottom">
-          <button class="nav-item" title="Settings">
-            <span class="nav-icon">⚙️</span>
-          </button>
-          <div class="user-profile">
-            <span class="user-avatar">M</span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <!-- Top Bar -->
-        <header class="top-bar">
-          <div class="workspace-selector">
-            <button class="workspace-btn active">Work</button>
-            <button class="workspace-btn">Personal</button>
-            <button class="add-workspace-btn">+</button>
-          </div>
-          <div class="top-actions">
-            <div class="search-container">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="search-input" placeholder="Search..." class="search-input">
-            </div>
-            <button id="show-open-tabs-btn" class="action-btn" title="Open Tabs">
-              <span class="icon">📑</span>
-            </button>
-          </div>
-        </header>
-
-        <!-- Board Area -->
-        <div id="board-container" class="board-container">
-          <!-- Open Tabs Panel (Overlay/Drawer) -->
-          <div id="open-tabs-panel" class="open-tabs-panel hidden">
-            <div class="panel-header">
-              <h3>Açık Sekmeler</h3>
-              <button id="close-tabs-panel" class="btn-icon">✕</button>
-            </div>
-            <div id="open-tabs-list" class="open-tabs-list">
-              <!-- Open tabs will be listed here -->
-            </div>
-          </div>
-
-          <!-- Columns Container -->
-          <div id="tabs-container" class="columns-container">
-            <!-- Bookmark categories/columns will be dynamically inserted here -->
-          </div>
-        </div>
-
-        <!-- Notes View -->
-        <div id="notes-view" class="view-container hidden">
-          <div class="view-header">
-            <h2>Notlar</h2>
-            <button id="add-note-btn" class="btn-primary">+ Yeni Not</button>
-          </div>
-          <div id="notes-grid" class="notes-grid">
-            <!-- Notes will be inserted here -->
-          </div>
-        </div>
-
-        <!-- To-Do View -->
-        <div id="todo-view" class="view-container hidden">
-          <div class="view-header">
-            <h2>Yapılacaklar</h2>
-          </div>
-          <div class="todo-container">
-            <div class="todo-input-group">
-              <input type="text" id="new-todo-input" placeholder="Yeni görev ekle..." class="todo-input">
-              <button id="add-todo-btn" class="btn-primary">Ekle</button>
-            </div>
-            <div id="todo-list" class="todo-list">
-              <!-- To-do items will be inserted here -->
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-    <!-- Modal Templates -->
-    <div id="modal-overlay" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h3 id="modal-title"></h3>
-          <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body" id="modal-body"></div>
-        <div class="modal-footer">
-          <button id="modal-cancel" class="btn-secondary">İptal</button>
-          <button id="modal-confirm" class="btn-primary">Onayla</button>
-        </div>
-      </div>
-    </div>
-
-    <script src="scripts/utils.js"></script>
-    <script src="scripts/storageManager.js"></script>
-    <script src="scripts/bookmarkManager.js"></script>
-    <script src="scripts/tabManager.js"></script>
-    <script src="scripts/sessionManager.js"></script>
-    <script src="scripts/groupManager.js"></script>
-    <script src="scripts/notesManager.js"></script>
-    <script src="scripts/todoManager.js"></script>
-    <script src="scripts/uiController.js"></script>
-    <script src="scripts/newtab.js"></script>
-  </body>
-
-  </html>
+</html>
