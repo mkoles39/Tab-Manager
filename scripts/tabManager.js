@@ -127,7 +127,9 @@ class TabManager {
 
     // Group tabs by URL
     this.tabs.forEach(tab => {
-      const url = tab.url;
+      // A tab that is still loading has an empty url and the target in pendingUrl
+      const url = tab.url || tab.pendingUrl;
+      if (!url) return;
       if (!urlMap.has(url)) {
         urlMap.set(url, []);
       }
@@ -147,7 +149,7 @@ class TabManager {
 
   // Check if a tab is duplicate
   isDuplicate(tab) {
-    return this.duplicates.has(tab.url);
+    return this.duplicates.has(tab.url || tab.pendingUrl);
   }
 
   // Close duplicate tabs (keep newest or oldest)

@@ -690,3 +690,28 @@ button:disabled {
   background-color: rgba(66, 133, 244, 0.3);
   color: var(--text-primary);
 }
+
+/* Popup helpers */
+.stats-bar.hidden,
+.action-bar.hidden {
+  display: none;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pick-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+.pick-list span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
