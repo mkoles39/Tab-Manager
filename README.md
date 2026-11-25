@@ -14,28 +14,17 @@
 
 ## Kurulum
 
-### Geliştirme Modu
+### İndirip Kurma
 
-1. Bu repoyu klonlayın veya indirin
-2. Chrome'da `chrome://extensions/` adresine gidin
-3. Sağ üstteki "Geliştirici modu"nu aktif edin
+**[⬇️ chrome-tab-manager-v1.0.0.zip indir](https://github.com/mkoles39/Tab-Manager/releases/latest/download/chrome-tab-manager-v1.0.0.zip)**
+
+1. Zip dosyasını indirip kalıcı bir klasöre çıkarın
+2. Tarayıcıda `chrome://extensions/` adresine gidin (Edge: `edge://extensions/`)
+3. "Geliştirici modu"nu aktif edin
 4. "Paketlenmemiş öğe yükle" butonuna tıklayın
-5. Proje klasörünü seçin
+5. Zip'i çıkardığınız klasörü seçin
 
-### Icon Dosyaları
-
-Icon dosyaları için `icons/icon.svg` dosyasını kullanarak PNG formatında icon'lar oluşturmanız gerekiyor:
-- icon16.png (16x16)
-- icon48.png (48x48)
-- icon128.png (128x128)
-
-Online SVG to PNG converter kullanabilirsiniz veya şu komutu kullanabilirsiniz:
-```bash
-# ImageMagick ile
-convert -background none -resize 16x16 icons/icon.svg icons/icon16.png
-convert -background none -resize 48x48 icons/icon.svg icons/icon48.png
-convert -background none -resize 128x128 icons/icon.svg icons/icon128.png
-```
+Kaynak koddan kurmak için repoyu klonlayıp proje klasörünü aynı şekilde yükleyebilirsiniz.
 
 ## Kullanım
 
@@ -53,18 +42,24 @@ Proje vanilla JavaScript, HTML ve CSS ile geliştirilmiştir. Herhangi bir frame
 ```
 ├── manifest.json          # Extension manifest
 ├── background.js          # Service worker
-├── popup.html            # Popup UI
+├── popup.html             # Popup UI
+├── newtab.html            # Yeni sekme sayfası
 ├── styles/
-│   └── popup.css         # Styles
+│   ├── popup.css
+│   └── newtab.css
 ├── scripts/
-│   ├── popup.js          # Main popup script
-│   ├── utils.js          # Utility functions
-│   ├── tabManager.js     # Tab management
-│   ├── sessionManager.js # Session management
-│   ├── groupManager.js   # Group management
-│   └── uiController.js   # UI controller
-└── icons/
-    └── icon.svg          # Icon source
+│   ├── popup.js           # Popup başlangıç betiği
+│   ├── newtab.js          # Yeni sekme başlangıç betiği
+│   ├── utils.js           # Yardımcı fonksiyonlar
+│   ├── storageManager.js  # Depolama
+│   ├── bookmarkManager.js # Yer işaretleri
+│   ├── tabManager.js      # Sekme yönetimi
+│   ├── sessionManager.js  # Session yönetimi
+│   ├── groupManager.js    # Grup yönetimi
+│   ├── notesManager.js    # Notlar
+│   ├── todoManager.js     # Yapılacaklar
+│   └── uiController.js    # UI controller
+└── icons/                 # SVG kaynağı ve PNG simgeler
 ```
 
 ## Test Etme

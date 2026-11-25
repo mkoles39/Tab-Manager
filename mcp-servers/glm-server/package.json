@@ -1,0 +1,17 @@
+{
+  "name": "glm-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for GLM 4.7 integration with Claude Code",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "node-fetch": "^3.3.2"
+  },
+  "keywords": ["mcp", "glm", "zhipu", "ai"],
+  "author": "Murat Kales",
+  "license": "MIT"
+}

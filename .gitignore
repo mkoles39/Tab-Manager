@@ -1,0 +1,11 @@
+# Yerel ayarlar
+.claude/
+.vscode/
+
+# Bağımlılıklar ve gizli dosyalar
+node_modules/
+.env
+
+# Paket çıktıları
+dist/
+*.zip
